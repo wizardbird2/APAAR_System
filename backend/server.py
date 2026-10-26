@@ -89,7 +89,8 @@ class H(BaseHTTPRequestHandler):
             return s._j(200, [dict(r) for r in c.execute('select * from students order by n')])
         if p == '/api/rules': return s._j(200, [dict(r) for r in c.execute('select * from rules')])
         if p == '/api/audit' and m == 'POST':
-            d = s.body(); audit(c, str(d.get('actor', u['name']))[:80], str(d.get('action', ''))[:120], str(d.get('detail', ''))[:300]); return s._j(200, {'ok': True})
+            # actor comes from the verified token, never from the request body; client-reported events are labelled as such
+            d = s.body(); audit(c, u['name'], 'client:' + str(d.get('action', ''))[:110], str(d.get('detail', ''))[:300]); return s._j(200, {'ok': True})
         if p == '/api/audit/verify': return s._j(200, {'intact': chain_ok(c) < 0, 'broken_at': chain_ok(c), 'entries': c.execute('select count(*) from audit_log').fetchone()[0]})
         if p == '/api/verify' and m == 'POST':
             d = s.body(); a = str(d.get('apaar', '')); purpose = str(d.get('purpose', ''))[:80]
