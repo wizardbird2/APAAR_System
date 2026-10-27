@@ -1879,7 +1879,9 @@ ${base + 19},Arjun Rao,CSE,NRI,active
       }
 
       const match = D.some(s => s.apaar === id && s.status === 'active');
-      const receiptNo = 'CR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+      let receiptNo = 'CR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+      let sig = '(offline mode: no server signature)';
+      try { const v = await api('/api/verify', { method: 'POST', body: JSON.stringify({ apaar: id, purpose, consent }) }); receiptNo = v.receipt; sig = 'Ed25519 ' + v.signature.slice(0, 24) + '…'; } catch (e) {}
 
       await logAudit('Public Verifier', `Verify: ${purpose}`, `ID: ${maskId(id)} · Receipt: ${receiptNo}`);
 
